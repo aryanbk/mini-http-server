@@ -14,16 +14,12 @@ public class Main {
       int spinCount = 0;
 
       while (true) {
-        Socket clienSocket = serverSocket.accept();
-        InputStreamReader isr = new InputStreamReader(clienSocket.getInputStream());
-        BufferedReader reader = new BufferedReader(isr);
-        String line = reader.readLine();
-        while (!line.isEmpty()) {
-          System.out.println(line);
-          line = reader.readLine();
+        try (Socket clienSocket = serverSocket.accept()) {
+          String httpResponse = "HTTP/1.1 200 OK\r\n\r\n";
+          clienSocket.getOutputStream().write(httpResponse.getBytes("UTF-8"));
+        } catch (Exception e) {
+          System.out.println(e);
         }
-        System.out.println("Spin...." + spinCount);
-        ++spinCount;
       }
 
     } catch (IOException e) {
