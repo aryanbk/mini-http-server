@@ -4,6 +4,7 @@ import java.io.InputStreamReader;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.text.MessageFormat;
+import java.util.Arrays;
 
 public class Main {
   public static void main(String[] args) {
@@ -30,7 +31,7 @@ public class Main {
                 urlPath = parts[1];
                 String[] resources = urlPath.split("/");
 
-                if (resources.length == 1) {
+                if (urlPath.equals("/")) {
                   clienSocket.getOutputStream().write(httpResponse200.getBytes("UTF-8"));
                 } else if (resources.length == 3 && resources[1].equals("echo")) {
                   httpResponseEcho = MessageFormat.format(
