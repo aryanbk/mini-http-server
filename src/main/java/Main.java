@@ -3,6 +3,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.text.MessageFormat;
 
 public class Main {
   public static void main(String[] args) {
@@ -12,7 +13,7 @@ public class Main {
 
       while (true) {
         try (Socket clienSocket = serverSocket.accept()) {
-          String httpResponse200 = "HTTP/1.1 200 OK\r\n\r\n";
+          String httpResponse200;
           String httpResponse404 = "HTTP/1.1 404 Not Found\r\n\r\n";
 
           InputStreamReader isr = new InputStreamReader(clienSocket.getInputStream());
@@ -21,12 +22,17 @@ public class Main {
 
           for (int lineNumber = 0; !line.isEmpty(); ++lineNumber) {
             if (lineNumber == 0) {
-              String[] parts = line.split("\r\n");
+              String[] parts = line.split(" ");
               String urlPath;
 
-              if (parts[0].startsWith("GET")) {
-                urlPath = parts[0].split(" ")[1];
-                if (urlPath.equals("/")) {
+              if (parts[0].equals("GET")) {
+                urlPath = parts[1];
+                String[] resources = urlPath.split("/");
+
+                if (resources.length == 3 && resources[1].equals("echo")) {
+                  httpResponse200 = MessageFormat.format(
+                      "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: {0}\r\n\r\n{1}",
+                      resources[2].length(), resources[2]);
                   clienSocket.getOutputStream().write(httpResponse200.getBytes("UTF-8"));
                 } else {
                   clienSocket.getOutputStream().write(httpResponse404.getBytes("UTF-8"));
