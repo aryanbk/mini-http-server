@@ -13,7 +13,8 @@ public class Main {
 
       while (true) {
         try (Socket clienSocket = serverSocket.accept()) {
-          String httpResponse200;
+          String httpResponse200 = "HTTP/1.1 200 OK\r\n\r\n";
+          String httpResponseEcho;
           String httpResponse404 = "HTTP/1.1 404 Not Found\r\n\r\n";
 
           InputStreamReader isr = new InputStreamReader(clienSocket.getInputStream());
@@ -29,11 +30,13 @@ public class Main {
                 urlPath = parts[1];
                 String[] resources = urlPath.split("/");
 
-                if (resources.length == 3 && resources[1].equals("echo")) {
-                  httpResponse200 = MessageFormat.format(
+                if (resources.length == 1) {
+                  clienSocket.getOutputStream().write(httpResponse200.getBytes("UTF-8"));
+                } else if (resources.length == 3 && resources[1].equals("echo")) {
+                  httpResponseEcho = MessageFormat.format(
                       "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: {0}\r\n\r\n{1}",
                       resources[2].length(), resources[2]);
-                  clienSocket.getOutputStream().write(httpResponse200.getBytes("UTF-8"));
+                  clienSocket.getOutputStream().write(httpResponseEcho.getBytes("UTF-8"));
                 } else {
                   clienSocket.getOutputStream().write(httpResponse404.getBytes("UTF-8"));
                 }
