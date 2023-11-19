@@ -10,10 +10,16 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 public class ClientHandler implements Runnable {
+    private String[] args;
     private Socket clientSocket;
 
     public ClientHandler(Socket clientSocket) {
         this.clientSocket = clientSocket;
+    }
+
+    public ClientHandler(Socket clientSocket, String[] args) {
+        this.clientSocket = clientSocket;
+        this.args = args;
     }
 
     @Override
@@ -35,12 +41,18 @@ public class ClientHandler implements Runnable {
             HttpRespose httpRespose;
             String response = "HTTP/1.1 404 Not Found\r\n\r\n";
 
-            if ("GET".equals(method) && uri.startsWith("/files/")) {
-                String pathString = uri.replaceFirst("/files", "/tmp");
+            if ("GET".equals(method) && uri.startsWith("/files/") && args.length != 0) {
+                String parentPath = "";
+                for (int i = 0; i < args.length - 1; ++i) {
+                    if (args[i].equals("--directory")) {
+                        parentPath = args[i + 1];
+                        break;
+                    }
+                }
+                String pathString = uri.replaceFirst("/files/", parentPath);
                 Path path = Paths.get(pathString);
                 System.out.println("pathString: " + pathString);
                 File file = new File(pathString);
-
                 if (file.exists() && !file.isDirectory()) {
                     String content = Files.readString(path);
                     httpRespose = new HttpRespose("200", "OK", content);
