@@ -43,6 +43,11 @@ public class HttpRespose {
         this.responseBody = responseBody;
     }
 
+    public void setHeaders(String contentType, String contentLength) {
+        headers.put("Content-Type", contentType);
+        headers.put("Content-Length", contentLength);
+    }
+
     public String getResponse() {
         StringBuilder responseBuilder = new StringBuilder();
         responseBuilder.append("HTTP/1.1 ").append(code).append(" ").append(message).append("\r\n");

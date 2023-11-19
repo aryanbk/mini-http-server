@@ -1,9 +1,13 @@
 package service;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 public class ClientHandler implements Runnable {
     private Socket clientSocket;
@@ -29,31 +33,36 @@ public class ClientHandler implements Runnable {
             String method = httpRequest.method;
             String uri = httpRequest.uri;
             HttpRespose httpRespose;
-            String response;
+            String response = "HTTP/1.1 404 Not Found\r\n\r\n";
 
-            if (method.equals("GET") && uri.equals("/user-agent")) {
+            if ("GET".equals(method) && uri.startsWith("/files/")) {
+                String pathString = uri.replaceFirst("/files", "/tmp");
+                Path path = Paths.get(pathString);
+                System.out.println("pathString: " + pathString);
+                File file = new File(pathString);
+
+                if (file.exists() && !file.isDirectory()) {
+                    String content = Files.readString(path);
+                    httpRespose = new HttpRespose("200", "OK", content);
+                    httpRespose.setHeaders("application/octet-stream", Long.toString(file.length()));
+                    response = httpRespose.getResponse();
+                }
+            } else if (method.equals("GET") && uri.equals("/user-agent")) {
                 String content = httpRequest.headers.get("User-Agent");
-
                 httpRespose = new HttpRespose("200", "OK", content);
-                httpRespose.headers.put("Content-Type", "text/plain");
-                httpRespose.headers.put("Content-Length", Integer.toString(content.length()));
-
+                httpRespose.setHeaders("text/plain", Integer.toString(content.length()));
                 response = httpRespose.getResponse();
             } else if (method.equals("GET") && uri.startsWith("/echo/") && uri.split("/").length == 3) {
                 String content = uri.split("/")[2];
-
                 httpRespose = new HttpRespose("200", "OK", content);
-                httpRespose.headers.put("Content-Type", "text/plain");
-                httpRespose.headers.put("Content-Length", Integer.toString(content.length()));
-
+                httpRespose.setHeaders("text/plain", Integer.toString(content.length()));
                 response = httpRespose.getResponse();
             } else if (method.equals("GET") && uri.equals("/")) {
                 httpRespose = new HttpRespose("200", "OK", "");
 
                 response = httpRespose.getResponse();
-            } else {
-                response = "HTTP/1.1 404 Not Found\r\n\r\n";
             }
+
             clientSocket.getOutputStream().write(response.getBytes("UTF-8"));
 
         } catch (IOException e) {
