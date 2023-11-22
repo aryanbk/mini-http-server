@@ -13,7 +13,7 @@ public class HttpRequest {
 
     public HttpRequest(String request) {
         this.request = request;
-        // System.out.println("request\n" + request);
+        System.out.println("request\n" + request + "\n---");
         headers = new HashMap<>();
 
         String[] requestLines = request.split("\r\n");

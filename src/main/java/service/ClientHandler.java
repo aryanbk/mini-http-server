@@ -9,7 +9,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
 
 public class ClientHandler implements Runnable {
     private String[] args;
@@ -28,25 +27,6 @@ public class ClientHandler implements Runnable {
     public void run() {
         try (InputStreamReader isr = new InputStreamReader(clientSocket.getInputStream());
                 BufferedReader reader = new BufferedReader(isr)) {
-            // String line = reader.readLine();
-            // StringBuilder requestBuilder = new StringBuilder();
-            // // while (line != null && !line.isEmpty()) {
-            // // requestBuilder.append(line).append("\r\n");
-            // // line = reader.readLine();
-            // // }
-            // boolean prevNull = false;
-            // for (int i = 0; i < 100; ++i) {
-            // requestBuilder.append(line);
-            // if (line != null && !line.isEmpty()) {
-            // if (prevNull) {
-            // break;
-            // }
-            // prevNull = true;
-            // }
-
-            // System.out.println(i + " length " + line.length() + " request line " + line);
-            // line = reader.readLine();
-            // }
 
             String line;
             int contentLength = 0;
@@ -54,56 +34,26 @@ public class ClientHandler implements Runnable {
 
             while (!(line = reader.readLine()).isEmpty()) {
                 requestBuilder.append(line).append("\r\n");
-
                 if (line.startsWith("Content-Length:")) {
                     contentLength = Integer.parseInt(line.split(":")[1].trim());
-                    requestBuilder.append("\r\n").append(reader.readLine()); // passing blank line
-                    if (contentLength > 0) {
-                        char[] body = new char[contentLength];
-                        reader.read(body, 0, contentLength);
-                        requestBuilder.append(body);
-                        System.out.println("content length " + contentLength);
-                        System.out.println("body " + Arrays.toString(body));
-                    }
-                    break;
                 }
             }
+            requestBuilder.append("\r\n"); // End of headers
 
-            String request = requestBuilder.toString();
+            // Read the body
+            if (contentLength > 0) {
+                char[] body = new char[contentLength];
+                reader.read(body, 0, contentLength);
+                requestBuilder.append(body);
+                System.out.println("Content Length: " + contentLength);
+                System.out.println("Body: " + new String(body));
+            }
 
-            // // while (line != null && !line.isEmpty()) {
-            // // requestBuilder.append(line).append("\r\n");
-            // // if (line.startsWith("Content-Length:")) {
-            // // contentLength = Integer.parseInt(line.split(": ")[1].trim());
-            // // }
-            // // line = reader.readLine();
-            // // }
-            // requestBuilder.append("\r\n");
-            // // Check for Content-Length header to read the body
-            // String requestWithoutBody = requestBuilder.toString();
-            // // int contentLength = getContentLength(requestWithoutBody);
-
-            // HttpRequest httpRequest = new HttpRequest(requestWithoutBody);
-            // // Read body if Content-Length is specified
-            // String contentLengthString =
-            // httpRequest.headers.getOrDefault("content-length", "0");
-            // int contentLength = Integer.parseInt(contentLengthString);
-            // if (contentLength > 0) {
-            // char[] body = new char[contentLength];
-            // reader.read(body, 0, contentLength);
-            // // requestBuilder.append(body);
-            // httpRequest.body = new String(body);
-            // }
-
-            // String fullRequest = requestBuilder.toString();
-            // System.out.println("Full HTTP Request:");
-            // System.out.println(fullRequest);
-
-            // String request = requestBuilder.toString();
-            // System.out.println("Received request \n" + request);
-            HttpRequest httpRequest = new HttpRequest(request);
+            HttpRequest httpRequest = new HttpRequest(requestBuilder.toString());
             String method = httpRequest.method;
             String uri = httpRequest.uri;
+
+            // --------------------- response handling
             HttpRespose httpRespose;
             String response = "HTTP/1.1 404 Not Found\r\n\r\n";
 
