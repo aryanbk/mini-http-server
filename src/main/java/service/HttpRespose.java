@@ -53,6 +53,7 @@ public class HttpRespose {
         this.code = codeAndMessage.substring(0, 3);
         this.message = codeAndMessage.substring(4, codeAndMessage.length());
         this.responseBody = responseBody;
+        this.headers = new LinkedHashMap<>();
     }
 
     public void setHeaders(String contentType, String contentLength) {
