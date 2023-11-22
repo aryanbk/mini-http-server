@@ -1,14 +1,9 @@
 package service;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 
 public class ClientHandler implements Runnable {
     private String[] args;
@@ -49,9 +44,10 @@ public class ClientHandler implements Runnable {
                 System.out.println("Body: " + new String(body));
             }
 
-            String response = RequestHandler.handleRequest(requestBuilder.toString(), args);
+            HttpRequest httpRequest = new HttpRequest(requestBuilder.toString());
+            HttpRespose response = RequestHandler.handleRequest(httpRequest, args);
 
-            clientSocket.getOutputStream().write(response.getBytes("UTF-8"));
+            clientSocket.getOutputStream().write(response.getResponse().getBytes("UTF-8"));
 
         } catch (IOException e) {
             e.printStackTrace();
