@@ -1,14 +1,12 @@
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.Arrays;
 
 import service.ClientHandler;
 
 public class Main {
   public static void main(String[] args) {
-    System.out.println("Logs from your program will appear here!");
-    System.out.println(Arrays.toString(args));
+    System.out.println("Logs from your program will appear here!\n\n\n");
     try (ServerSocket serverSocket = new ServerSocket(4221)) {
       serverSocket.setReuseAddress(true);
 
