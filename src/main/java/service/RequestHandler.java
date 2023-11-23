@@ -137,14 +137,20 @@ public class RequestHandler {
             e.printStackTrace();
             System.out.println("Exception at compression handler " + e.getMessage());
         }
-        StringBuilder hexBuilder = new StringBuilder();
-        byte[] byteArray = baos.toByteArray();
-        for (byte b : byteArray) {
-            hexBuilder.append(String.format("%02X", b)).append(" ");
-        }
-        httpRespose.responseBody = hexBuilder.substring(0, hexBuilder.length() - 1).toString();
-        httpRespose.setHeaders(CONTENT_LENGTH_HEADER, Integer.toString(byteArray.length));
-        System.out.println(Arrays.toString(byteArray) + "\n" + hexBuilder + "\n" + byteArray.length);
+        // StringBuilder hexBuilder = new StringBuilder();
+        // byte[] byteArray = baos.toByteArray();
+        // for (byte b : byteArray) {
+        // hexBuilder.append(String.format("%02X", b)).append(" ");
+        // }
+        // httpRespose.responseBody = hexBuilder.substring(0, hexBuilder.length() -
+        // 1).toString();
+        String compressedContent = baos.toString();
+        httpRespose.responseBody = compressedContent;
+        httpRespose.setHeaders(CONTENT_LENGTH_HEADER, Integer.toString(compressedContent.length()));
+        // httpRespose.setHeaders(CONTENT_LENGTH_HEADER,
+        // Integer.toString(byteArray.length));
+        // System.out.println(Arrays.toString(byteArray) + "\n" + hexBuilder + "\n" +
+        // byteArray.length);
     }
 
     private static HttpRespose generateResponse(String status, String body) {
