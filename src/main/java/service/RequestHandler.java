@@ -142,7 +142,7 @@ public class RequestHandler {
         for (byte b : byteArray) {
             hexBuilder.append(String.format("%02X", b)).append(" ");
         }
-        httpRespose.responseBody = hexBuilder.toString();
+        httpRespose.responseBody = hexBuilder.substring(0, hexBuilder.length() - 1).toString();
         httpRespose.setHeaders(CONTENT_LENGTH_HEADER, Integer.toString(byteArray.length));
         System.out.println(Arrays.toString(byteArray) + "\n" + hexBuilder + "\n" + byteArray.length);
     }
