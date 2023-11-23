@@ -140,7 +140,7 @@ public class RequestHandler {
         StringBuilder hexBuilder = new StringBuilder();
         byte[] byteArray = baos.toByteArray();
         for (byte b : byteArray) {
-            hexBuilder.append(String.format("%02X", b));
+            hexBuilder.append(String.format("%02X", b)).append(" ");
         }
         httpRespose.responseBody = hexBuilder.toString();
         httpRespose.setHeaders(CONTENT_LENGTH_HEADER, Integer.toString(byteArray.length));
