@@ -75,7 +75,7 @@ public class HttpRespose {
 
     void printResponse() {
         System.out.println(
-                "\n-------respose start\n" + code + "\n" + message + "\n" + headers + "\n" + responseBody
-                        + "\n-------respose end\n");
+                "\n-------respose start-------\n" + code + "\n" + message + "\n" + headers + "\n" + responseBody
+                        + "\n-------respose end-------\n");
     }
 }

@@ -45,7 +45,7 @@ public class RequestHandler {
             response = generateResponse(NOT_FOUND_RESPONSE, "");
         }
 
-        if (GET.equals(method) && httpRequest.headers.getOrDefault(ACCEPT_ENCODING, "").equals("gzip")) {
+        if (GET.equals(method) && httpRequest.containsEncoding("gzip")) {
             handleCompression(httpRequest, response);
             // response.setHeaders(CONTENT_ENCODING, "gzip");
         }

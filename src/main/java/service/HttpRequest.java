@@ -4,6 +4,8 @@ import java.util.Map;
 import java.util.HashMap;
 
 public class HttpRequest {
+
+    private static final String ACCEPT_ENCODING = "Accept-Encoding";
     String request;
     String method;
     String uri;
@@ -36,8 +38,8 @@ public class HttpRequest {
             }
             String[] headerParts = header.split(": ");
             if (headerParts.length > 1) {
-                String headerName = headerParts[0];
-                String headerValue = headerParts[1];
+                String headerName = headerParts[0].trim();
+                String headerValue = headerParts[1].trim();
                 headers.put(headerName, headerValue);
                 // System.out.println("headerName and headerValue " + headerName + ": " +
                 // headerValue);
@@ -59,9 +61,21 @@ public class HttpRequest {
         printRequest();
     }
 
+    public boolean containsEncoding(String encoding) {
+        // regex to trim and split
+        String[] encodingsStrings = headers.getOrDefault(ACCEPT_ENCODING, "").split("\\s*,\\s*");
+        for (int i = 0; i < encodingsStrings.length; ++i) {
+            if (encodingsStrings[i].equals(encoding)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     void printRequest() {
         System.out.println(
-                "\n-------request start\n" + method + "\n" + uri + "\n" + httpVersion + "\n" + headers + "\n" + body
-                        + "\n-------request end\n");
+                "\n-------request start-------\n" + method + "\n" + uri + "\n" + httpVersion + "\n" + headers + "\n"
+                        + body
+                        + "\n-------request end-------\n");
     }
 }
