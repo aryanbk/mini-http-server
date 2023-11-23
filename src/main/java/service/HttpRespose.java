@@ -56,9 +56,8 @@ public class HttpRespose {
         this.headers = new LinkedHashMap<>();
     }
 
-    public void setHeaders(String contentType, String contentLength) {
-        headers.put("Content-Type", contentType);
-        headers.put("Content-Length", contentLength);
+    public void setHeaders(String key, String values) {
+        headers.put(key, values);
     }
 
     public String getResponse() {
