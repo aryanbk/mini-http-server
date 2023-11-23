@@ -17,6 +17,8 @@ public class RequestHandler {
     private static final String CONTENT_LENGTH_HEADER = "Content-Length";
     private static final String OCTET_STREAM = "application/octet-stream";
     private static final String TEXT_PLAIN = "text/plain";
+    private static final String ACCEPT_ENCODING = "Accept-Encoding";
+    private static final String CONTENT_ENCODING = "Content-Encoding";
 
     public static HttpRespose handleRequest(HttpRequest httpRequest, String[] args) {
         // HttpRequest httpRequest = new HttpRequest(request);
@@ -41,6 +43,10 @@ public class RequestHandler {
             response = generateResponse(OK, "");
         } else {
             response = generateResponse(NOT_FOUND_RESPONSE, "");
+        }
+
+        if (GET.equals(method) && httpRequest.headers.containsKey(ACCEPT_ENCODING)) {
+            handleCompression(httpRequest, response);
         }
 
         return response;
@@ -111,6 +117,10 @@ public class RequestHandler {
         httpRespose.setHeaders(CONTENT_LENGTH_HEADER, Integer.toString(content.length()));
         // return httpRespose.getResponse();
         return httpRespose;
+    }
+
+    private static void handleCompression(HttpRequest httpRequest, HttpRespose httpRespose) {
+        httpRespose.setHeaders(CONTENT_ENCODING, "gzip");
     }
 
     private static HttpRespose generateResponse(String status, String body) {
