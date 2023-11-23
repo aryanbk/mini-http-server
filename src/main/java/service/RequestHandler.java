@@ -1,11 +1,14 @@
 package service;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.zip.GZIPOutputStream;
 
 public class RequestHandler {
 
@@ -46,8 +49,11 @@ public class RequestHandler {
         }
 
         if (GET.equals(method) && httpRequest.containsEncoding("gzip")) {
-            handleCompression(httpRequest, response);
-            // response.setHeaders(CONTENT_ENCODING, "gzip");
+            try {
+                handleCompression(httpRequest, response);
+            } catch (Exception e) {
+                System.out.println("Exception at compression handler " + e.getMessage());
+            }
         }
 
         return response;
@@ -120,8 +126,25 @@ public class RequestHandler {
         return httpRespose;
     }
 
-    private static void handleCompression(HttpRequest httpRequest, HttpRespose httpRespose) {
+    private static void handleCompression(HttpRequest httpRequest, HttpRespose httpRespose) throws Exception {
         httpRespose.setHeaders(CONTENT_ENCODING, "gzip");
+        String content = httpRequest.uri.split("/")[2];
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+
+        try (GZIPOutputStream gzip = new GZIPOutputStream(baos)) {
+            gzip.write(content.getBytes("UTF-8"));
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.out.println("Exception at compression handler " + e.getMessage());
+        }
+        StringBuilder hexBuilder = new StringBuilder();
+        byte[] byteArray = baos.toByteArray();
+        for (byte b : byteArray) {
+            hexBuilder.append(String.format("%02X", b));
+        }
+        httpRespose.responseBody = hexBuilder.toString();
+        httpRespose.setHeaders(CONTENT_LENGTH_HEADER, Integer.toString(byteArray.length));
+        System.out.println(Arrays.toString(byteArray) + "\n" + hexBuilder + "\n" + byteArray.length);
     }
 
     private static HttpRespose generateResponse(String status, String body) {
