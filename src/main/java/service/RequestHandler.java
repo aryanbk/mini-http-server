@@ -106,7 +106,7 @@ public class RequestHandler {
             return generateResponse("400 Bad Request", "User-Agent header not found");
         }
         HttpRespose httpRespose = new HttpRespose(OK, content);
-        httpRespose.setHeaders(CONTENT_TYPE_HEADER, OCTET_STREAM);
+        httpRespose.setHeaders(CONTENT_TYPE_HEADER, TEXT_PLAIN);
         httpRespose.setHeaders(CONTENT_LENGTH_HEADER, Integer.toString(content.length()));
         return httpRespose;
     }
