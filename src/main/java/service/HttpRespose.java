@@ -69,6 +69,13 @@ public class HttpRespose {
         responseBuilder.append("\r\n");
         responseBuilder.append(responseBody);
 
+        printResponse();
         return responseBuilder.toString();
+    }
+
+    void printResponse() {
+        System.out.println(
+                "\n-------respose start\n" + code + "\n" + message + "\n" + headers + "\n" + responseBody
+                        + "\n-------respose end\n");
     }
 }

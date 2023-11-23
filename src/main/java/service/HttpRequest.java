@@ -13,15 +13,15 @@ public class HttpRequest {
 
     public HttpRequest(String request) {
         this.request = request;
-        System.out.println("request\n" + request + "\n---");
+        // System.out.println("request\n" + request + "\n---");
         headers = new HashMap<>();
 
         String[] requestLines = request.split("\r\n");
-        System.out.println(request);
-        System.out.println("requestLines");
+        // System.out.println(request);
+        // System.out.println("requestLines");
         for (int i = 0; i < requestLines.length; ++i) {
-            System.out.println(i);
-            System.out.println(requestLines[i]);
+            // System.out.println(i);
+            // System.out.println(requestLines[i]);
         }
         String[] requestLineParts = requestLines[0].split(" ");
         this.method = requestLineParts[0];
@@ -39,7 +39,8 @@ public class HttpRequest {
                 String headerName = headerParts[0];
                 String headerValue = headerParts[1];
                 headers.put(headerName, headerValue);
-                System.out.println("headerName and headerValue " + headerName + ": " + headerValue);
+                // System.out.println("headerName and headerValue " + headerName + ": " +
+                // headerValue);
             }
         }
 
@@ -54,6 +55,13 @@ public class HttpRequest {
         } else {
             this.body = "";
         }
-        System.out.println("request body: " + body);
+        // System.out.println("request body: " + body);
+        printRequest();
+    }
+
+    void printRequest() {
+        System.out.println(
+                "\n-------request start\n" + method + "\n" + uri + "\n" + httpVersion + "\n" + headers + "\n" + body
+                        + "\n-------request end\n");
     }
 }
