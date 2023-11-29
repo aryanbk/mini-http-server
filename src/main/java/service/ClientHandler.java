@@ -2,8 +2,10 @@ package service;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
 
 public class ClientHandler implements Runnable {
     private String[] args;
@@ -20,8 +22,8 @@ public class ClientHandler implements Runnable {
 
     @Override
     public void run() {
-        try (InputStreamReader isr = new InputStreamReader(clientSocket.getInputStream());
-                BufferedReader reader = new BufferedReader(isr)) {
+        try (InputStream is = clientSocket.getInputStream();
+             BufferedReader reader = new BufferedReader(new InputStreamReader(is))) {
 
             String line;
             int contentLength = 0;
@@ -36,18 +38,15 @@ public class ClientHandler implements Runnable {
             requestBuilder.append("\r\n"); // End of headers
 
             // Read the body
-            if (contentLength > 0) {
-                char[] body = new char[contentLength];
-                reader.read(body, 0, contentLength);
-                requestBuilder.append(body);
-                System.out.println("Content Length: " + contentLength);
-                System.out.println("Body: " + new String(body));
-            }
+            byte[] body = new byte[contentLength];
+            is.read(body, 0, contentLength);
+            System.out.println("body- " + new String(body, StandardCharsets.UTF_8));
 
-            HttpRequest httpRequest = new HttpRequest(requestBuilder.toString());
+            HttpRequest httpRequest = new HttpRequest(requestBuilder.toString(), body);
+
             HttpRespose response = RequestHandler.handleRequest(httpRequest, args);
 
-            clientSocket.getOutputStream().write(response.getResponse().getBytes("UTF-8"));
+            clientSocket.getOutputStream().write(response.getResponse());
 
         } catch (IOException e) {
             e.printStackTrace();

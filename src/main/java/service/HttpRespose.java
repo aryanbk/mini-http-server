@@ -11,48 +11,48 @@ public class HttpRespose {
     String code;
     String message;
     LinkedHashMap<String, String> headers;
-    String responseBody;
+    byte[] body;
 
     // public HttpRespose(String code, String message, LinkedHashMap<String, String>
-    // headers, String responseBody) {
+    // headers, byte[] body) {
     // this.version = "1.1";
     // this.code = code;
     // this.message = message;
     // this.headers = headers;
-    // this.responseBody = responseBody;
+    // this.body = body;
     // }
 
     // public HttpRespose(String version, String code, String message,
     // LinkedHashMap<String, String> headers,
-    // String responseBody) {
+    // byte[] body) {
     // this.version = version;
     // this.code = code;
     // this.message = message;
     // this.headers = headers;
-    // this.responseBody = responseBody;
+    // this.body = body;
     // }
 
     // public HttpRespose(String version, String code, String message, String
-    // responseBody) {
+    // body) {
     // this.version = version;
     // this.code = code;
     // this.message = message;
     // this.headers = new LinkedHashMap<>();
-    // this.responseBody = responseBody;
+    // this.body = body;
     // }
 
-    public HttpRespose(String code, String message, String responseBody) {
+    public HttpRespose(String code, String message, byte[] body) {
         this.version = "1.1";
         this.code = code;
         this.message = message;
         this.headers = new LinkedHashMap<>();
-        this.responseBody = responseBody;
+        this.body = body;
     }
 
-    public HttpRespose(String codeAndMessage, String responseBody) {
+    public HttpRespose(String codeAndMessage, byte[] body) {
         this.code = codeAndMessage.substring(0, 3);
         this.message = codeAndMessage.substring(4, codeAndMessage.length());
-        this.responseBody = responseBody;
+        this.body = body;
         this.headers = new LinkedHashMap<>();
     }
 
@@ -60,22 +60,27 @@ public class HttpRespose {
         headers.put(key, values);
     }
 
-    public String getResponse() {
-        StringBuilder responseBuilder = new StringBuilder();
-        responseBuilder.append(VERSION).append(code).append(" ").append(message).append("\r\n");
+    public byte[] getResponse() {
+        StringBuilder headerBuilder = new StringBuilder();
+        headerBuilder.append(VERSION).append(code).append(" ").append(message).append("\r\n");
         for (Map.Entry<String, String> header : headers.entrySet()) {
-            responseBuilder.append(header.getKey()).append(": ").append(header.getValue()).append("\r\n");
+            headerBuilder.append(header.getKey()).append(": ").append(header.getValue()).append("\r\n");
         }
-        responseBuilder.append("\r\n");
-        responseBuilder.append(responseBody);
+        headerBuilder.append("\r\n");
+
+        byte[] headerBytes = headerBuilder.toString().getBytes();
+        byte[] responseBytes = new byte[headerBytes.length + body.length];
+        
+        System.arraycopy(headerBytes, 0, responseBytes, 0, headerBytes.length);
+        System.arraycopy(body, 0, responseBytes, headerBytes.length, body.length);
 
         printResponse();
-        return responseBuilder.toString();
+        return responseBytes;
     }
 
     void printResponse() {
         System.out.println(
-                "\n-------respose start-------\n" + code + "\n" + message + "\n" + headers + "\n" + responseBody
+                "\n-------respose start-------\n" + code + "\n" + message + "\n" + headers + "\n" + new String(body)
                         + "\n-------respose end-------\n");
     }
 }

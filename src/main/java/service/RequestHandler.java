@@ -43,16 +43,17 @@ public class RequestHandler {
         } else if (GET.equals(method) && uri.startsWith("/echo/") && uri.split("/").length == 3) {
             response = handleEchoRequest(uri);
         } else if (GET.equals(method) && uri.equals("/")) {
-            response = generateResponse(OK, "");
+            response = generateResponse(OK, new byte[0]);
         } else {
-            response = generateResponse(NOT_FOUND_RESPONSE, "");
+            response = generateResponse(NOT_FOUND_RESPONSE, new byte[0]);
         }
 
         if (GET.equals(method) && httpRequest.containsEncoding("gzip")) {
             try {
                 handleCompression(httpRequest, response);
             } catch (Exception e) {
-                System.out.println("Exception at compression handler " + e.getMessage());
+                System.out.println("Exception at compression handler: " + e.getMessage());
+                e.printStackTrace(); // Add this line for more detailed error information
             }
         }
 
@@ -76,14 +77,14 @@ public class RequestHandler {
         if (!file.exists() && new File(directoryPath).isDirectory()
                 && OCTET_STREAM.equals(httpRequest.headers.get(CONTENT_TYPE_HEADER))) {
             try {
-                Files.write(path, httpRequest.body.getBytes(StandardCharsets.UTF_8));
-                return generateResponse("201 Created", "");
+                Files.write(path, httpRequest.body);
+                return generateResponse("201 Created", new byte[0]);
             } catch (IOException e) {
                 System.out.println("Exception - at file creation " + e.getMessage());
-                return generateResponse("500 Internal Server Error", "");
+                return generateResponse("500 Internal Server Error", new byte[0]);
             }
         }
-        return generateResponse(NOT_FOUND_RESPONSE, "");
+        return generateResponse(NOT_FOUND_RESPONSE, new byte[0]);
     }
 
     private static HttpRespose handleGetFileRequest(String uri, String directoryPath) {
@@ -93,67 +94,58 @@ public class RequestHandler {
 
         if (file.exists() && !file.isDirectory()) {
             try {
-                String content = Files.readString(path);
+                byte[] content = Files.readAllBytes(path);
                 HttpRespose httpRespose = new HttpRespose(OK, content);
                 httpRespose.setHeaders(CONTENT_TYPE_HEADER, OCTET_STREAM);
                 httpRespose.setHeaders(CONTENT_LENGTH_HEADER, Long.toString(file.length()));
                 return httpRespose;
             } catch (IOException e) {
                 System.out.println("Exception at file read " + e.getMessage());
-                return generateResponse("500 Internal Server Error", "");
+                return generateResponse("500 Internal Server Error", new byte[0]);
             }
         }
-        return generateResponse(NOT_FOUND_RESPONSE, "");
+        return generateResponse(NOT_FOUND_RESPONSE, new byte[0]);
     }
 
     private static HttpRespose handleUserAgentRequest(HttpRequest httpRequest) {
-        String content = httpRequest.headers.get("User-Agent");
+        String contentString = httpRequest.headers.get("User-Agent");
+        byte[] content = contentString.getBytes(StandardCharsets.UTF_8);
         if (content == null) {
-            return generateResponse("400 Bad Request", "User-Agent header not found");
+            return generateResponse("400 Bad Request", "User-Agent header not found".getBytes(StandardCharsets.UTF_8));
         }
         HttpRespose httpRespose = new HttpRespose(OK, content);
         httpRespose.setHeaders(CONTENT_TYPE_HEADER, TEXT_PLAIN);
-        httpRespose.setHeaders(CONTENT_LENGTH_HEADER, Integer.toString(content.length()));
+        httpRespose.setHeaders(CONTENT_LENGTH_HEADER, Integer.toString(contentString.length()));
         return httpRespose;
     }
 
     private static HttpRespose handleEchoRequest(String uri) {
-        String content = uri.split("/")[2];
+        String contentString = uri.split("/")[2];
+        byte[] content = contentString.getBytes(StandardCharsets.UTF_8);
         HttpRespose httpRespose = new HttpRespose(OK, content);
         httpRespose.setHeaders(CONTENT_TYPE_HEADER, TEXT_PLAIN);
-        httpRespose.setHeaders(CONTENT_LENGTH_HEADER, Integer.toString(content.length()));
+        httpRespose.setHeaders(CONTENT_LENGTH_HEADER, Integer.toString(contentString.length()));
         // return httpRespose.getResponse();
         return httpRespose;
     }
 
     private static void handleCompression(HttpRequest httpRequest, HttpRespose httpRespose) throws Exception {
-        httpRespose.setHeaders(CONTENT_ENCODING, "gzip");
-        String content = httpRequest.uri.split("/")[2];
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-
-        try (GZIPOutputStream gzip = new GZIPOutputStream(baos)) {
-            gzip.write(content.getBytes("UTF-8"));
-        } catch (IOException e) {
-            e.printStackTrace();
-            System.out.println("Exception at compression handler " + e.getMessage());
+        if (httpRespose.body.length==0) {
+            return; // No need to compress empty responses
         }
-        // StringBuilder hexBuilder = new StringBuilder();
-        // byte[] byteArray = baos.toByteArray();
-        // for (byte b : byteArray) {
-        // hexBuilder.append(String.format("%02X", b)).append(" ");
-        // }
-        // httpRespose.responseBody = hexBuilder.substring(0, hexBuilder.length() -
-        // 1).toString();
-        String compressedContent = baos.toString();
-        httpRespose.responseBody = compressedContent;
-        httpRespose.setHeaders(CONTENT_LENGTH_HEADER, Integer.toString(compressedContent.length()));
-        // httpRespose.setHeaders(CONTENT_LENGTH_HEADER,
-        // Integer.toString(byteArray.length));
-        // System.out.println(Arrays.toString(byteArray) + "\n" + hexBuilder + "\n" +
-        // byteArray.length);
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        try (GZIPOutputStream gzip = new GZIPOutputStream(baos)) {
+            gzip.write(httpRespose.body);
+        }
+
+        byte[] compressedBytes = baos.toByteArray();
+        httpRespose.body = compressedBytes; // Change this line
+        httpRespose.setHeaders(CONTENT_ENCODING, "gzip");
+        httpRespose.setHeaders(CONTENT_LENGTH_HEADER, Integer.toString(compressedBytes.length));
     }
 
-    private static HttpRespose generateResponse(String status, String body) {
+    private static HttpRespose generateResponse(String status, byte[] body) {
         return new HttpRespose(status, body);
     }
 }
