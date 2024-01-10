@@ -1,7 +1,6 @@
 package service;
 
 import java.util.Map;
-import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 
 public class HttpRequest {
@@ -12,9 +11,9 @@ public class HttpRequest {
     String uri;
     String httpVersion;
     Map<String, String> headers;
-    byte[] body;
+    String body;
 
-    public HttpRequest(String request, byte[] body) {
+    public HttpRequest(String request) {
         this.request = request;
         // System.out.println("request\n" + request + "\n---");
         headers = new HashMap<>();
@@ -47,20 +46,17 @@ public class HttpRequest {
             }
         }
 
-        // // Body starts after the empty line, so increment i to skip the empty line
-        // i++;
-        // if (i < requestLines.length) {
-        //     StringBuilder bodyBuilder = new StringBuilder();
-        //     for (; i < requestLines.length; i++) {
-        //         bodyBuilder.append(requestLines[i]).append("\r\n");
-        //     }
-        //     this.body = bodyBuilder.toString().trim();
-        // } else {
-        //     this.body = "";
-        // }
-
-        this.body = body;
-
+        // Body starts after the empty line, so increment i to skip the empty line
+        i++;
+        if (i < requestLines.length) {
+            StringBuilder bodyBuilder = new StringBuilder();
+            for (; i < requestLines.length; i++) {
+                bodyBuilder.append(requestLines[i]).append("\r\n");
+            }
+            this.body = bodyBuilder.toString().trim();
+        } else {
+            this.body = "";
+        }
         // System.out.println("request body: " + body);
         printRequest();
     }
@@ -79,7 +75,7 @@ public class HttpRequest {
     void printRequest() {
         System.out.println(
                 "\n-------request start-------\n" + method + "\n" + uri + "\n" + httpVersion + "\n" + headers + "\n"
-                        + new String(body, StandardCharsets.UTF_8)
+                        + body
                         + "\n-------request end-------\n");
     }
 }

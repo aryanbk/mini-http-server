@@ -2,3 +2,7 @@ java_http.jar
 target/*
 target/
 .idea/
+.codecrafters/*
+.codecrafters/
+codecrafters.yml
+.gitattributes

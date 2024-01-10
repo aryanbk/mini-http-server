@@ -1,39 +1,71 @@
-[![progress-banner](https://backend.codecrafters.io/progress/http-server/a12bd469-8d27-4110-8d0c-e47dbc973b28)](https://app.codecrafters.io/users/codecrafters-bot?r=2qF)
+# Minimal Java HTTP Server
 
-This is a starting point for Java solutions to the
-["Build Your Own HTTP server" Challenge](https://app.codecrafters.io/courses/http-server/overview).
+A lightweight, custom-built HTTP server implemented in Java without relying on built-in tools.
 
-[HTTP](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol) is the
-protocol that powers the web. In this challenge, you'll build a HTTP/1.1 server
-that is capable of serving multiple clients.
+## Features
 
-Along the way you'll learn about TCP servers,
-[HTTP request syntax](https://www.w3.org/Protocols/rfc2616/rfc2616-sec5.html),
-and more.
+-   Supports GET and POST requests
+-   GZip compression
+-   File transfers
+-   Multiple concurrent connections
+-   Custom request dispatcher for routing
 
-**Note**: If you're viewing this repo on GitHub, head over to
-[codecrafters.io](https://codecrafters.io) to try the challenge.
+## Getting Started
 
-# Passing the first stage
+### Prerequisites
 
-The entry point for your HTTP server implementation is in
-`src/main/java/Main.java`. Study and uncomment the relevant code, and push your
-changes to pass the first stage:
+-   Java JDK 21 or higher
+-   Maven
 
-```sh
-git add .
-git commit -m "pass 1st stage" # any msg
-git push origin master
+### Installation
+
+1. Clone the repository:
+    ```
+    git clone https://github.com/aryanbk/mini-http-server
+    ```
+2. Navigate to the project directory:
+    ```
+    cd mini-http-server
+    ```
+3. Build the project:
+    ```
+    mvn package
+    ```
+4. Run the server:
+    ```
+    ./mini_http_server.sh
+    ```
+    or
+    ```
+    java -jar target/mini-http-server-1.0-SNAPSHOT.jar
+    ```
+
+### Running the Server
+
+Run the server using the following command:
+
+```
+mvn exec:java -Dexec.mainClass="com.aryanbk.minihttp.Server"
 ```
 
-Time to move on to the next stage!
+Options:
 
-# Stage 2 & beyond
+-   `--directory <path>`: Specify the directory for file operations
 
-Note: This section is for stages 2 and beyond.
+## Usage
 
-1. Ensure you have `java (21)` installed locally
-1. Run `./your_program.sh` to run your program, which is implemented in
-   `src/main/java/Main.java`.
-1. Commit your changes and run `git push origin master` to submit your solution
-   to CodeCrafters. Test output will be streamed to your terminal.
+The server handles various types of requests:
+
+1. GET /: Returns a 200 OK response
+2. GET /echo/<message>: Echoes the message back
+3. GET /user-agent: Returns the User-Agent header
+4. GET /files/<filename>: Retrieves a file from the specified directory
+5. POST /files/<filename>: Uploads a file to the specified directory
+
+## Project Structure
+
+-   `Main.java`: Entry point of the application
+-   `ClientHandler.java`: Handles individual client connections
+-   `HttpRequest.java`: Parses and represents HTTP requests
+-   `HttpResponse.java`: Builds and represents HTTP responses
+-   `RequestHandler.java`: Routes requests to appropriate handlers
